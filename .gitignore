@@ -1,4 +1,6 @@
 /build*
 /.vscode
 /cpm_modules
+/Debug
+/Release
 .DS_Store
