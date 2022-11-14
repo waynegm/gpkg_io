@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 project(
-  gpkg_io
+  gpkgio
   VERSION 1.0
+  DESCRIPTION "Basic IO library for Geopackage vector data"
   LANGUAGES CXX
 )
-include(CTest)
 
-# ---- Include guards ----
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
   message(
@@ -15,49 +15,26 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
   )
 endif()
 
-include(FetchContent)
-#
-# Get the sqlite amalgamation and build a static library
-#
-FetchContent_Declare(
-    sqlite3
-    URL https://www.sqlite.org/2022/sqlite-amalgamation-3380200.zip
-)
-message(STATUS "Fetching SQLite...")
-FetchContent_GetProperties(sqlite3)
-if (NOT sqlite3_POPULATED)
-    FetchContent_Populate(sqlite3)
-    configure_file(sqlite3_CMakeLists.in ${sqlite3_SOURCE_DIR}/CMakeLists.txt COPYONLY)
-    add_subdirectory(${sqlite3_SOURCE_DIR} ${sqlite3_BINARY_DIR})
+find_package(SQLite3 REQUIRED)
+
+add_subdirectory(external EXCLUDE_FROM_ALL)
+
+add_subdirectory( src )
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+    find_package(Doxygen)
+    if(Doxygen_FOUND)
+	add_subdirectory(docs)
+    else()
+	message(STATUS "Doxygen not found, not building docs")
+    endif()
+
+    include(CTest)
+    add_subdirectory(tests)
+
 endif()
 
-set(SQLITE3_INCLUDE_DIR ${sqlite3_SOURCE_DIR} CACHE FILEPATH "x" FORCE)
-
-message(STATUS "Building SQLite...")
-execute_process(
-    COMMAND ${CMAKE_COMMAND} ${sqlite3_SOURCE_DIR} -B ${sqlite3_BINARY_DIR}
-)
-execute_process(
-    COMMAND ${CMAKE_COMMAND} --build ${sqlite3_BINARY_DIR}
-)
-find_library(
-    SQLITE3_LIBRARY
-    NAMES sqlite3
-    PATHS ${sqlite3_BINARY_DIR}
-    NO_DEFAULT_PATH
-)
-
-add_subdirectory( gpkg_io_src )
-
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 14)
-target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
-
-target_include_directories(
-  ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-                         $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
-)
-
-if (BUILD_TESTING)
-    add_subdirectory( test )
-endif()
-
+install(TARGETS  gpkgio DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+install(TARGETS  gpkg_ext DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
