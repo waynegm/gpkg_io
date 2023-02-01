@@ -41,6 +41,10 @@ public:
 				      const std::vector<std::string>& field_names,
 				      const std::vector<std::string>& field_defs);
 
+    bool		startTransaction();
+    bool		commitTransaction();
+    bool		rollbackTransaction();
+
     template<typename... Args>
     bool		addLineString(sqlite3_stmt* stmt, const std::vector<double>& points, Args... args);
     template<typename... Args>

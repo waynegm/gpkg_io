@@ -466,5 +466,21 @@ void GeopackageIO::bind_value<const char*>(sqlite3_stmt* stmt, int col, const ch
     sqlite3_bind_text(stmt, col, val, static_cast<int>(strlen(val)), SQLITE_TRANSIENT);
 }
 
+bool GeopackageIO::startTransaction()
+{
+    return sqlExecute("BEGIN TRANSACTION");
+}
+
+bool GeopackageIO::commitTransaction()
+{
+    return sqlExecute("END TRANSACTION");
+}
+
+bool GeopackageIO::rollbackTransaction()
+{
+    return sqlExecute("ROLLBACK");
+}
+
+
 
 
