@@ -23,7 +23,7 @@ public:
     GeopackageIO&	operator=(const GeopackageIO&) = delete;
 
     bool		isOK() const		{ return errmsg_.empty(); }
-    std::string		errorMsg() const	{ return errmsg_; }
+    const char*		errorMsg() const	{ return errmsg_.c_str(); }
     sqlite3*		dbHandle() const	{ return dbh_; }
 
     bool		hasSRS(int id);
