@@ -70,3 +70,4 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
 endif()
 
 install(TARGETS gpkgio gpkg_ext)
+install(FILES include/gpkgio/gpkgio.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
