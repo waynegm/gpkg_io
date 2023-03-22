@@ -43,7 +43,7 @@ add_library(gpkgio::gpkgio ALIAS gpkgio)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
