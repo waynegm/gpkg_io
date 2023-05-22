@@ -6,21 +6,6 @@ project(
   LANGUAGES CXX
 )
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-
-if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-  message(
-    FATAL_ERROR
-      "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there."
-  )
-endif()
-
-find_package(SQLite3 REQUIRED)
-
-add_subdirectory(external EXCLUDE_FROM_ALL)
-
-add_subdirectory( src )
-
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(CMAKE_CXX_EXTENSIONS OFF)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -32,9 +17,58 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     endif()
 
     include(CTest)
-    add_subdirectory(tests)
-
 endif()
 
-install(TARGETS  gpkgio DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-install(TARGETS  gpkg_ext DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+find_package(SQLite3 REQUIRED)
+
+include (FetchContent)
+
+FetchContent_Declare(
+    libgpkg
+    GIT_REPOSITORY	https://github.com/luciad/libgpkg.git
+    GIT_TAG		9f90a9330d75fd41ff6a857c28f9865c1aa18b7b
+)
+FetchContent_GetProperties(libgpkg)
+if(NOT libgpkg_POPULATED)
+  FetchContent_Populate(libgpkg)
+  add_subdirectory(${libgpkg_SOURCE_DIR} ${libgpkg_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+add_library(${PROJECT_NAME}
+    src/utils.h
+    src/utils.cc
+    src/gpkgio.cc
+)
+add_library(gpkgio::gpkgio ALIAS gpkgio)
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+	${libgpkg_SOURCE_DIR}/gpkg
+
+)
+
+target_compile_features(${PROJECT_NAME}
+    PUBLIC
+	cxx_std_11
+	cxx_variadic_templates
+)
+
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+	gpkg_ext
+    PRIVATE
+	SQLite::SQLite3
+	gpkg_static
+)
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
+
+include(GNUInstallDirs)
+install(TARGETS gpkgio gpkg_ext)
+install(FILES include/gpkgio/gpkgio.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

@@ -348,6 +348,7 @@ bool GeopackageIO::addGeomLayer(const char* type, const char* layernm, const cha
 				 const vector<string>& field_names,
 				 const vector<string>& field_defs)
 {
+    errmsg_.clear();
     if (!makeGeomTable(layernm, srs_id, type, field_names, field_defs))
     {
 	errmsg_.insert(0, "addGeomLayer: ");
@@ -375,7 +376,7 @@ bool GeopackageIO::makeGeomTable(const char* layernm, const char* srsid, const c
     if (!checkFieldInfo(field_names, field_defs))
 	return false;
 
-    if (!append_ || !hasLayer(layernm))
+    if (!hasLayer(layernm))
     {
 	string fields("fid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL");
 	for (int idx=0; idx<field_names.size(); idx++)
@@ -408,6 +409,7 @@ bool GeopackageIO::makeGeomStatement(sqlite3_stmt** stmt,  const char* layernm, 
 bool GeopackageIO::makeGeomStatement(sqlite3_stmt** stmt,  const char* layernm, const char* srsid,
 				     const vector<string>& field_names)
 {
+    errmsg_.clear();
     if (!hasLayer(layernm))
 	return false;
 
@@ -471,33 +473,48 @@ string GeopackageIO::getPolygonWKB(const std::vector<std::vector<double>>& rings
     return wkbwr.getWKBString();
 }
 
-template <typename Arg>
-void GeopackageIO::bind_value(sqlite3_stmt* stmt, int col, Arg val)
-{}
+bool GeopackageIO::startTransaction()
+{
+    return sqlExecute("BEGIN TRANSACTION");
+}
 
-template <>
-void GeopackageIO::bind_value<int>(sqlite3_stmt* stmt, int col, int val)
+bool GeopackageIO::commitTransaction()
+{
+    return sqlExecute("END TRANSACTION");
+}
+
+bool GeopackageIO::rollbackTransaction()
+{
+    return sqlExecute("ROLLBACK");
+}
+
+void GeopackageIO::bind_value(sqlite3_stmt* stmt, int col, int val)
 {
     sqlite3_bind_int(stmt, col, val);
 }
 
-template <>
-void GeopackageIO::bind_value<double>(sqlite3_stmt* stmt, int col, double val)
+void GeopackageIO::bind_value(sqlite3_stmt* stmt, int col, float val)
+{
+    sqlite3_bind_double(stmt, col, static_cast<double>(val));
+}
+
+void GeopackageIO::bind_value(sqlite3_stmt* stmt, int col, double val)
 {
     sqlite3_bind_double(stmt, col, val);
 }
 
-template <>
-void GeopackageIO::bind_value<std::string>(sqlite3_stmt* stmt, int col, std::string val)
+void GeopackageIO::bind_value(sqlite3_stmt* stmt, int col, std::string& val)
 {
-    sqlite3_bind_text(stmt, col, val.data(), static_cast<int>(val.size()), SQLITE_TRANSIENT);
+    if (!val.empty())
+	sqlite3_bind_text(stmt, col, val.data(), static_cast<int>(val.size()), SQLITE_TRANSIENT);
 }
 
-template <>
-void GeopackageIO::bind_value<const char*>(sqlite3_stmt* stmt, int col, const char* val)
+void GeopackageIO::bind_value(sqlite3_stmt* stmt, int col, const char* val)
 {
-    sqlite3_bind_text(stmt, col, val, static_cast<int>(strlen(val)), SQLITE_TRANSIENT);
+    if (val)
+	sqlite3_bind_text(stmt, col, val, static_cast<int>(strlen(val)), SQLITE_TRANSIENT);
 }
+
 
 
 

@@ -23,7 +23,7 @@ public:
     GeopackageIO&	operator=(const GeopackageIO&) = delete;
 
     bool		isOK() const		{ return errmsg_.empty(); }
-    std::string		errorMsg() const	{ return errmsg_; }
+    const char*		errorMsg() const	{ return errmsg_.c_str(); }
     sqlite3*		dbHandle() const	{ return dbh_; }
 
     bool		hasSRS(int id);
@@ -44,6 +44,10 @@ public:
     bool		addGeomLayer(const char* type, const char* layername, const char* srsid,
 				      const std::vector<std::string>& field_names,
 				      const std::vector<std::string>& field_defs);
+
+    bool		startTransaction();
+    bool		commitTransaction();
+    bool		rollbackTransaction();
 
     template<typename... Args>
     bool		addLineString(sqlite3_stmt* stmt, const std::vector<double>& points, Args... args);
@@ -91,10 +95,15 @@ protected:
 
     void		bind_values(sqlite3_stmt* stmt, int col)	{}
     template <typename Arg, typename... ArgRest>
-    void		bind_values(sqlite3_stmt* stmt, int col, const Arg& val, const ArgRest&... rest);
+    void		bind_values(sqlite3_stmt* stmt, int col, Arg val, const ArgRest&... rest);
 
-    template <typename T>
-    void		bind_value(sqlite3_stmt* stmt, int col, T val);
+    void		bind_value(sqlite3_stmt* stmt, int col, int val);
+    void		bind_value(sqlite3_stmt* stmt, int col, float val);
+    void		bind_value(sqlite3_stmt* stmt, int col, double val);
+    void		bind_value(sqlite3_stmt* stmt, int col, std::string& val);
+    void		bind_value(sqlite3_stmt* stmt, int col, const char* val);
+    template <typename Arg>
+    void		bind_value(sqlite3_stmt* stmt, int col, Arg val);
 
     template <typename... Args>
     bool		addGeom(sqlite3_stmt* stmt, const std::string& wkbstr, Args... args);
@@ -106,16 +115,21 @@ protected:
 
 
 template <typename Arg, typename... ArgRest>
-void GeopackageIO::bind_values(sqlite3_stmt* stmt, int col, const Arg& val, const ArgRest&... rest)
+void GeopackageIO::bind_values(sqlite3_stmt* stmt, int col, Arg val, const ArgRest&... rest)
 {
     bind_value(stmt, col, val);
     bind_values(stmt, col+1, rest...);
 }
 
+template <typename Arg>
+void GeopackageIO::bind_value(sqlite3_stmt* stmt, int col, Arg val)
+{}
+
+
 template<typename... Args>
 bool GeopackageIO::addLineString(sqlite3_stmt* stmt, const std::vector<double>& points, Args... args)
 {
-
+    errmsg_.clear();
     std::string wkbstr = getLineStringWKB(points);
     if (!isOK() || !addGeom(stmt, wkbstr, args... ))
 	errmsg_.insert(0, "addLineString: ");
@@ -126,6 +140,7 @@ bool GeopackageIO::addLineString(sqlite3_stmt* stmt, const std::vector<double>& 
 template<typename... Args>
 bool GeopackageIO::addPoint(sqlite3_stmt* stmt, double x, double y, Args... args)
 {
+    errmsg_.clear();
     std::string wkbstr = getPointWKB(x, y);
     if (!isOK() || !addGeom(stmt, wkbstr, args... ))
 	errmsg_.insert(0, "addPoint: ");
@@ -136,7 +151,7 @@ bool GeopackageIO::addPoint(sqlite3_stmt* stmt, double x, double y, Args... args
 template<typename... Args>
 bool GeopackageIO::addPolygon(sqlite3_stmt* stmt, const std::vector<std::vector<double>>& rings, Args... args)
 {
-
+    errmsg_.clear();
     std::string wkbstr = getPolygonWKB(rings);
     if (!isOK() || !addGeom(stmt, wkbstr, args... ))
 	errmsg_.insert(0, "addPolygon: ");
@@ -147,6 +162,7 @@ bool GeopackageIO::addPolygon(sqlite3_stmt* stmt, const std::vector<std::vector<
 template<typename... Args>
 bool GeopackageIO::addGeom(sqlite3_stmt* stmt, const std::string& wkbstr, Args... args)
 {
+    errmsg_.clear();
     sqlite3_reset(stmt);
     sqlite3_bind_blob(stmt, 1, wkbstr.data(), static_cast<int>(wkbstr.size()), SQLITE_STATIC);
     bind_values(stmt, 2, args...);
@@ -155,5 +171,3 @@ bool GeopackageIO::addGeom(sqlite3_stmt* stmt, const std::string& wkbstr, Args..
 
     return isOK();
 }
-
-
