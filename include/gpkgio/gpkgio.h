@@ -34,7 +34,7 @@ public:
 			       const char* org_id, const char* definition="undefined", const char* description="undefined");
     bool		hasLayer(const char*);
 
-    bool		beginTransaction(const char* name=nullptr);
+    bool		startTransaction(const char* name=nullptr);
     bool		rollbackTransaction(const char* name=nullptr);
     bool		commitTransaction(const char* name=nullptr);
 
@@ -44,10 +44,6 @@ public:
     bool		addGeomLayer(const char* type, const char* layername, const char* srsid,
 				      const std::vector<std::string>& field_names,
 				      const std::vector<std::string>& field_defs);
-
-    bool		startTransaction(const char*);
-    bool		commitTransaction(const char*);
-    bool		rollbackTransaction(const char*);
 
     template<typename... Args>
     bool		addLineString(sqlite3_stmt* stmt, const std::vector<double>& points, Args... args);
