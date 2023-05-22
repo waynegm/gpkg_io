@@ -473,21 +473,6 @@ string GeopackageIO::getPolygonWKB(const std::vector<std::vector<double>>& rings
     return wkbwr.getWKBString();
 }
 
-bool GeopackageIO::startTransaction()
-{
-    return sqlExecute("BEGIN TRANSACTION");
-}
-
-bool GeopackageIO::commitTransaction()
-{
-    return sqlExecute("END TRANSACTION");
-}
-
-bool GeopackageIO::rollbackTransaction()
-{
-    return sqlExecute("ROLLBACK");
-}
-
 void GeopackageIO::bind_value(sqlite3_stmt* stmt, int col, int val)
 {
     sqlite3_bind_int(stmt, col, val);
