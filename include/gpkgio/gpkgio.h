@@ -34,6 +34,10 @@ public:
 			       const char* org_id, const char* definition="undefined", const char* description="undefined");
     bool		hasLayer(const char*);
 
+    bool		beginTransaction(const char* name=nullptr);
+    bool		rollbackTransaction(const char* name=nullptr);
+    bool		commitTransaction(const char* name=nullptr);
+
     bool		addGeomLayer(const char* type, const char* layername, int srsid,
 				      const std::vector<std::string>& field_names,
 				      const std::vector<std::string>& field_defs);

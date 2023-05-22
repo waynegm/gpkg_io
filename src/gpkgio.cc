@@ -29,6 +29,39 @@ GeopackageIO::~GeopackageIO()
     close();
 }
 
+bool GeopackageIO::startTransaction(const char* name)
+{
+    string sql;
+    if (name)
+	sql = string("SAVEPOINT") + name;
+    else
+	sql = string("BEGIN");
+
+    return sqlExecute(sql.c_str());
+}
+
+bool GeopackageIO::commitTransaction(const char* name)
+{
+    string sql;
+    if (name)
+	sql = string("RELEASE SAVEPOINT") + name;
+    else
+	sql = string("COMMIT");
+
+    return sqlExecute(sql.c_str());
+}
+
+bool GeopackageIO::rollbackTransaction(const char* name)
+{
+    string sql;
+    if (name)
+	sql = string("ROLLBACK TO SAVEPOINT") + name;
+    else
+	sql = string("ROLLBACK");
+
+    return sqlExecute(sql.c_str());
+}
+
 bool GeopackageIO::hasSRS(int id)
 {
     return hasSRS(to_string(id).c_str());
