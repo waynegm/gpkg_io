@@ -12,8 +12,9 @@
 #include <string>
 #include <vector>
 #include "sqlite3.h"
+#include "gpkgio_export.h"
 
-class GeopackageIO
+class GPKGIO_EXPORT GeopackageIO
 {
 public:
     GeopackageIO(const char* filename, bool append=false);
