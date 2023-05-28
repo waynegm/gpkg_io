@@ -34,12 +34,15 @@ if(NOT libgpkg_POPULATED)
   add_subdirectory(${libgpkg_SOURCE_DIR} ${libgpkg_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 add_library(${PROJECT_NAME}
     src/utils.h
     src/utils.cc
     src/gpkgio.cc
 )
 add_library(gpkgio::gpkgio ALIAS gpkgio)
+generate_export_header(gpkgio)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
@@ -71,4 +74,5 @@ endif()
 
 include(GNUInstallDirs)
 install(TARGETS gpkgio gpkg_ext)
-install(FILES include/gpkgio/gpkgio.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES include/gpkgio/gpkgio.h ${PROJECT_BINARY_DIR}/gpkgio_export.h
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
