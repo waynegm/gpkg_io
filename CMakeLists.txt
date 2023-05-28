@@ -34,6 +34,7 @@ if(NOT libgpkg_POPULATED)
   add_subdirectory(${libgpkg_SOURCE_DIR} ${libgpkg_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+include(GenerateExportHeader)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 add_library(${PROJECT_NAME}
