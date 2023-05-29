@@ -74,7 +74,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-#include(GNUInstallDirs)
 install(TARGETS gpkgio gpkg_ext)
 install(FILES include/gpkgio/gpkgio.h ${PROJECT_BINARY_DIR}/gpkgio_export.h
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
