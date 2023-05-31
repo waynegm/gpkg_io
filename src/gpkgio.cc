@@ -125,7 +125,7 @@ sqlite3* GeopackageIO::doOpen(const char* filename, int flags, std::string& errm
 	      sqlite3_load_extension(dbh, gpkglibloc_.c_str(), 0, nullptr)
 	      !=SQLITE_OK )
     {
-	errmsg = sqlite3_errmsg(dbh);
+	errmsg = "Cannot load extension: " + gpkglibloc_;
 	sqlite3_close_v2(dbh);
 	return nullptr;
     }
