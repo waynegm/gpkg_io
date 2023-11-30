@@ -121,11 +121,17 @@ sqlite3* GeopackageIO::doOpen(const char* filename, int flags, std::string& errm
 	return nullptr;
     }
 
+    char* pzErrMsg = nullptr;
     if ( sqlite3_enable_load_extension(dbh, 1)!=SQLITE_OK ||
-	      sqlite3_load_extension(dbh, gpkglibloc_.c_str(), 0, nullptr)
+	      sqlite3_load_extension(dbh, gpkglibloc_.c_str(), 0, &pzErrMsg)
 	      !=SQLITE_OK )
     {
 	errmsg = "Cannot load extension: " + gpkglibloc_;
+	if (pzErrMsg)
+	{
+	    errmsg += pzErrMsg;
+	    sqlite3_free(pzErrMsg);
+	}
 	sqlite3_close_v2(dbh);
 	return nullptr;
     }
