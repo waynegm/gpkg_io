@@ -19,7 +19,6 @@ FetchContent_MakeAvailable( gpkgio )
 -  Change to the build folder
 -  Run cmake ..
 
-## Custom SQLite Installation
+## Custom SQLite3 Installation
 For a custom SQLite installation set the following CMake definitions on the CMake command line (-D...) or in the CMake GUI/TUI:
--  SQLite3_INCLUDE_DIR:PATH=
--  SQLite3_LIBRARY:FILEPATH=
+-  SQLite3_ROOT:PATH=
