@@ -67,6 +67,7 @@ if( (CMAKE_CONFIGURATION_TYPES OR MSVC) AND NOT CMAKE_DEBUG_POSTFIX )
 endif()
 
 add_library( gpkgio
+	include/gpkgio/gpkgio.h
 	src/gpkgio.cc
 	src/utils.cc
 	src/utils.h
@@ -88,24 +89,26 @@ target_include_directories( gpkgio
 
 )
 
+if ( BUILD_SHARED_LIBS )
+    set( gpkg gpkg_ext )
+else()
+    set( gpkg gpkg_static )
+endif()
+
 target_link_libraries( gpkgio
-    PUBLIC
-	gpkg_ext
     PRIVATE
+	${gpkg}
 	SQLite::SQLite3
-	gpkg_static
 )
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-install( TARGETS gpkg_ext EXPORT gpkgTargets
+install( TARGETS ${gpkg} EXPORT gpkgTargets
     LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-)
-install( TARGETS gpkg_static EXPORT gpkgTargets
     ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
 )
 install( TARGETS gpkgio EXPORT gpkgioTargets
