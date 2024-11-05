@@ -20,6 +20,7 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 set( CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON )
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED True )
+option( BUILD_SHARED_LIBS "Build using shared libraries" OFF )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -65,9 +66,10 @@ if( (CMAKE_CONFIGURATION_TYPES OR MSVC) AND NOT CMAKE_DEBUG_POSTFIX )
   set( CMAKE_DEBUG_POSTFIX _d )
 endif()
 
-add_library( gpkgio SHARED
+add_library( gpkgio
 	src/gpkgio.cc
 	src/utils.cc
+	src/utils.h
 )
 generate_export_header( gpkgio )
 set_property(TARGET gpkgio PROPERTY VERSION ${gpkgio_VERSION})
@@ -100,8 +102,10 @@ endif()
 
 install( TARGETS gpkg_ext EXPORT gpkgTargets
     LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
+)
+install( TARGETS gpkg_static EXPORT gpkgTargets
+    ARCHIVE DESTINATION lib
     INCLUDES DESTINATION include
 )
 install( TARGETS gpkgio EXPORT gpkgioTargets
