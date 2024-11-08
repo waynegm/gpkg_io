@@ -20,7 +20,6 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 set( CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON )
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED True )
-option( BUILD_SHARED_LIBS "Build using shared libraries" OFF )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -89,14 +88,11 @@ target_include_directories( gpkgio
 
 )
 
-if ( BUILD_SHARED_LIBS )
-    set( gpkg gpkg_ext )
-else()
-    set( gpkg gpkg_static )
-endif()
-
 target_link_libraries( gpkgio
+    PUBLIC
+	gpkg_ext
     PRIVATE
+	gpkg_static
 	${gpkg}
 	SQLite::SQLite3
 )
@@ -105,7 +101,13 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-install( TARGETS ${gpkg} EXPORT gpkgTargets
+install( TARGETS gpkg_ext EXPORT gpkgTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+install( TARGETS gpkg_static EXPORT gpkgTargets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
