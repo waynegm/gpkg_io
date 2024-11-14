@@ -1,9 +1,9 @@
-include_directories("." SQLite::SQLite3 ${PROJECT_NAME})
+include_directories("${CMAKE_SOURCE_DIR}/include" "${CMAKE_BINARY_DIR}")
 add_executable(gpkgio_test gpkgio_test.cc)
 
 target_compile_features(gpkgio_test PRIVATE cxx_std_11)
 
-target_link_libraries(gpkgio_test PRIVATE ${PROJECT_NAME} gpkg_ext SQLite::SQLite3 )
+target_link_libraries(gpkgio_test PRIVATE gpkgio gpkg_ext SQLite::SQLite3 )
 
 FetchContent_Declare(
     empty_gpkg
