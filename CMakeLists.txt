@@ -72,10 +72,12 @@ add_library( gpkgio
 	src/utils.h
 )
 generate_export_header( gpkgio )
-set_property(TARGET gpkgio PROPERTY VERSION ${gpkgio_VERSION})
-set_property(TARGET gpkgio PROPERTY SOVERSION ${gpkgio_VERSION_MAJOR})
-set_property(TARGET gpkgio PROPERTY INTERFACE_gpkgio_MAJOR_VERSION ${gpkgio_VERSION_MAJOR})
-set_property(TARGET gpkgio APPEND PROPERTY COMPATIBLE_INTERFACE_STRING gpkgio_VERSION_MAJOR )
+set_target_properties( gpkgio PROPERTIES
+	VERSION ${gpkgio_VERSION}
+	SOVERSION ${gpkgio_VERSION_MAJOR}
+	INTERFACE_gpkgio_MAJOR_VERSION ${gpkgio_VERSION_MAJOR}
+	COMPATIBLE_INTERFACE_STRING gpkgio_VERSION_MAJOR
+	CMAKE_POSITION_INDEPENDENT_CODE ON )
 
 target_include_directories( gpkgio
     PUBLIC
@@ -85,7 +87,6 @@ target_include_directories( gpkgio
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${PROJECT_BINARY_DIR}
 	${libgpkg_SOURCE_DIR}/gpkg
-
 )
 
 target_link_libraries( gpkgio
@@ -97,7 +98,7 @@ target_link_libraries( gpkgio
 	SQLite::SQLite3
 )
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+if ( CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING )
     add_subdirectory(tests)
 endif()
 
