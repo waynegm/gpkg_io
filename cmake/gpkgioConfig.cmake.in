@@ -1,10 +1,4 @@
-get_filename_component(gpkgio_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(CMakeFindDependencyMacro)
+find_dependency(gpkg 0.9.18)
 
-list(APPEND CMAKE_MODULE_PATH ${gpkgio_CMAKE_DIR})
-
-if(NOT TARGET gpkgio::gpkgio)
-    include("${gpkgio_CMAKE_DIR}/gpkgioTargets.cmake")
-endif()
-
-set(gpkgio_LIBRARIES gpkgio::gpkgio)
+include("${CMAKE_CURRENT_LIST_DIR}/gpkgioTargets.cmake")
